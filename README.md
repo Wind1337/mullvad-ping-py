@@ -20,7 +20,7 @@ Python-based script to ping Mullvad relays
 
 ## Arguments
 ```
-usage: main [-h] [--country COUNTRY] [--owned] [--server-type {ram,disk}] [--protocol {openvpn,wireguard,bridge}]
+usage: mullvad-ping-py [-h] [--country COUNTRY] [--owned] [--server-type {ram,disk}] [--protocol {openvpn,wireguard,bridge}]
             [--exclude-protocol {openvpn,wireguard,bridge}] [--exclude-provider EXCLUDE_PROVIDER]
 
 A Mullvad relay ping script
