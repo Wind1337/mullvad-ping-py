@@ -71,11 +71,16 @@ api_url = "https://api.mullvad.net/www/relays/"
 api_url += use_protocol
 
 print("Fetching relay list from Mullvad...")
-response = requests.get(api_url)
+try:
+    response = requests.get(api_url)
+except requests.exceptions.ConnectionError:
+    print("An exception occurred while attempting to connect to Mullvad API")
+    print("Mullvad API Fetch Failed")
+    sys.exit(1)
 
 if response.status_code != requests.codes.ok:
     print("Mullvad API Fetch Failed")
-    exit(1)
+    sys.exit(1)
 
 response_json = response.json()
 
@@ -97,7 +102,7 @@ for i in range(len(response_json)):
     provider = response_json[i]["provider"]
     if check_skip(country_code, provider, protocol, stboot, owned):
         continue
-    host = ping(ip_addr, count=5, interval=0.2, timeout=5)
+    host = ping(ip_addr, count=count, interval=interval, timeout=timeout)
     if host.is_alive:
         avg_ping = str(round(host.avg_rtt, 2)) + "ms"
         print("Pinged {hostname:15s}| latency={avg_ping:10s} protocol={protocol:10s} provider={provider:10s}"
