@@ -5,10 +5,10 @@ import requests
 import argparse
 
 parser = argparse.ArgumentParser(description="A Mullvad relay ping script")
-parser.add_argument("--country", dest="country", default=None,
-                    help="Ping servers from a certain country e.g.(us, uk, se)")
 parser.add_argument("--owned", dest="owned", default=None, action='store_true',
                     help="Ping only servers owned by Mullvad")
+parser.add_argument("--country", dest="country", default=None,
+                    help="Ping servers from a certain country e.g.(us, uk, se)")
 parser.add_argument("--server-type", dest="server_type", default=None, choices=['ram', 'disk'],
                     help="Select a server type to ping e.g.(ram, disk)")
 parser.add_argument("--protocol", dest="use_protocol", default="all", choices=['openvpn', 'wireguard', 'bridge'],
@@ -20,11 +20,11 @@ parser.add_argument("--exclude-provider", dest="exclude_provider", default=None,
 
 args = parser.parse_args()
 
-# Ping country
-country = args.country
-
 # Owned server
 owned_flag = args.owned
+
+# Ping country
+country = args.country
 
 # Server type
 server_type = args.server_type
