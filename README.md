@@ -27,8 +27,8 @@ A Mullvad relay ping script
 
 options:
   -h, --help            show this help message and exit
-  --country COUNTRY     Ping servers from a certain country e.g.(us, uk, se)
   --owned               Ping only servers owned by Mullvad
+  --country COUNTRY     Ping servers from a certain country e.g.(us, uk, se)
   --server-type {ram,disk}
                         Select a server type to ping e.g.(ram, disk)
   --protocol {openvpn,wireguard,bridge}
