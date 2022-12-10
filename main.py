@@ -94,6 +94,7 @@ try:
 except SocketPermissionError:
     print("You require elevated privileges to run icmplib")
     print("Rerun with sudo or as administrator")
+    sys.exit(1)
 
 print("Initiating ping operation with parameters: count={count}, interval={interval:.0f}ms, timeout={timeout}s \n"
       .format(count=count, interval=interval * 1000, timeout=timeout))
@@ -116,4 +117,4 @@ for i in range(len(response_json)):
         print("Pinged {hostname:15s}| latency={avg_ping:10s} protocol={protocol:10s} provider={provider:10s}"
               .format(hostname=hostname, avg_ping=avg_ping, protocol=protocol, provider=provider))
     else:
-        print("Failed to ping {hostname}".format(hostname=hostname))
+        print("Failed to ping {hostname} ({ip_addr})".format(hostname=hostname, ip_addr=ip_addr))
