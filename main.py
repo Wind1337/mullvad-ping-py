@@ -1,4 +1,4 @@
-from icmplib import ping
+from icmplib import ping, SocketPermissionError
 import signal
 import sys
 import requests
@@ -87,6 +87,14 @@ response_json = response.json()
 count = 5
 interval = 0.2
 timeout = 3
+
+print("Testing ping functionality...")
+try:
+    host = ping("8.8.8.8", count=1, timeout=timeout)
+except SocketPermissionError:
+    print("You require elevated privileges to run icmplib")
+    print("Rerun with sudo or as administrator")
+
 print("Initiating ping operation with parameters: count={count}, interval={interval:.0f}ms, timeout={timeout}s \n"
       .format(count=count, interval=interval * 1000, timeout=timeout))
 for i in range(len(response_json)):
