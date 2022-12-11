@@ -39,10 +39,28 @@ exclude_provider = args.exclude_provider
 # Exclude Protocol
 exclude_protocol = args.exclude_protocol
 
+results = []
+errors = []
 
 def handler(signum, frame):
+    print_results()
     sys.exit(0)
 
+
+def print_results():
+    global results
+    results = sorted(results, key=lambda d: d['latency'])
+    print("\nRESULTS\n")
+    if len(results) < 5:
+        for j in range(len(results)):
+            print("Hostname: {hostname:15s}| latency: {latency:10s} protocol: {protocol:10s} provider: {provider:10s}"
+                  .format(hostname=results[j]["hostname"], latency=str(results[j]["latency"])+"ms",
+                          protocol=results[j]["protocol"], provider=results[j]["provider"]))
+    else:
+        for j in range(5):
+            print("Hostname: {hostname:15s}| latency: {latency:10s} protocol: {protocol:10s} provider: {provider:10s}"
+                  .format(hostname=results[j]["hostname"], latency=str(results[j]["latency"])+"ms",
+                          protocol=results[j]["protocol"], provider=results[j]["provider"]))
 
 def check_skip(country_code, provider, protocol, stboot, owned):
     if country:
@@ -114,7 +132,14 @@ for i in range(len(response_json)):
     host = ping(ip_addr, count=count, interval=interval, timeout=timeout)
     if host.is_alive:
         avg_ping = str(round(host.avg_rtt, 2)) + "ms"
+        result_dict = {"hostname": hostname, "latency": round(host.avg_rtt, 2), "protocol": protocol, "stboot": stboot,
+                       "provider": provider, "owned": owned}
+        results.append(result_dict)
         print("Pinged {hostname:15s}| latency={avg_ping:10s} protocol={protocol:10s} provider={provider:10s}"
               .format(hostname=hostname, avg_ping=avg_ping, protocol=protocol, provider=provider))
     else:
+        result_dict = {"hostname": hostname, "latency": "timeout"}
+        errors.append(result_dict)
         print("Failed to ping {hostname} ({ip_addr})".format(hostname=hostname, ip_addr=ip_addr))
+
+print_results()
