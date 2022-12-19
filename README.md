@@ -20,8 +20,8 @@ Python-based script to ping Mullvad relays
 
 ## Arguments
 ```
-usage: mullvad-ping-py [-h] [--country COUNTRY] [--owned] [--server-type {ram,disk}] [--protocol {openvpn,wireguard,bridge}]
-            [--exclude-protocol {openvpn,wireguard,bridge}] [--exclude-provider EXCLUDE_PROVIDER]
+usage: mullvad-ping-py [-h] [--owned] [--country COUNTRY] [--server-type {ram,disk}] [--protocol {openvpn,wireguard,bridge}] [--exclude-protocol {openvpn,wireguard,bridge}] [--exclude-provider EXCLUDE_PROVIDER] [--count COUNT]
+                           [--interval INTERVAL] [--timeout TIMEOUT]
 
 A Mullvad relay ping script
 
@@ -37,6 +37,9 @@ options:
                         Exclude a VPN protocol - Default: none
   --exclude-provider EXCLUDE_PROVIDER
                         Exclude a provider (M247)
+  --count COUNT         Number of times to ping each host
+  --interval INTERVAL   Interval time between each ping (ms)
+  --timeout TIMEOUT     Time to wait before timeout (s)
 ```
 
 ## To-do:
