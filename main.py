@@ -17,6 +17,9 @@ parser.add_argument("--exclude-protocol", dest="exclude_protocol", default=None,
                     choices=['openvpn', 'wireguard', 'bridge'],
                     help="Exclude a VPN protocol - Default: none")
 parser.add_argument("--exclude-provider", dest="exclude_provider", default=None, help="Exclude a provider (M247)")
+parser.add_argument("--count", dest="count", default=5, help="Number of times to ping each host")
+parser.add_argument("--interval", dest="interval", default=200, help="Interval time between each ping (ms)")
+parser.add_argument("--timeout", dest="timeout", default=3, help="Time to wait before timeout (s)")
 
 args = parser.parse_args()
 
@@ -39,6 +42,10 @@ exclude_provider = args.exclude_provider
 # Exclude Protocol
 exclude_protocol = args.exclude_protocol
 
+count = int(args.count)
+interval = float(args.interval) / 1000
+timeout = int(args.timeout)
+
 results = []
 errors = []
 
@@ -51,6 +58,7 @@ def print_results():
     global results
     results = sorted(results, key=lambda d: d['latency'])
     print("\nRESULTS\n")
+    print("Servers with the lowest latency")
     if len(results) < 5:
         for j in range(len(results)):
             print("Hostname: {hostname:15s}| latency: {latency:10s} protocol: {protocol:10s} provider: {provider:10s}"
@@ -101,10 +109,6 @@ if response.status_code != requests.codes.ok:
     sys.exit(1)
 
 response_json = response.json()
-
-count = 5
-interval = 0.2
-timeout = 3
 
 print("Testing ping functionality...")
 try:
