@@ -43,7 +43,7 @@ options:
 ```
 
 ## To-do:
--[x] Display servers with lowest ping at the end of the script (or script termination)
--[x] Customizable ping numbers, intervals and timeout
--[ ] Optionally save results to a CSV file (?)
--[ ] Additional arguments (?)
+- [x] Display servers with lowest ping at the end of the script (or script termination)
+- [x] Customizable ping numbers, intervals and timeout
+- [ ] Optionally save results to a CSV file (?)
+- [ ] Additional arguments (?)
