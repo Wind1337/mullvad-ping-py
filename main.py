@@ -124,7 +124,7 @@ response_json = response.json()
 
 print("Testing ping functionality...")
 try:
-    host = ping("8.8.8.8", count=1, timeout=timeout)
+    host = ping("8.8.8.8", count=1, timeout=timeout, privileged=False)
 except SocketPermissionError:
     print("You require elevated privileges to run icmplib")
     print("Rerun with sudo or as administrator")
@@ -145,7 +145,7 @@ for i in range(len(response_json)):
     provider = response_json[i]["provider"]
     if check_skip(country_code, provider, protocol, stboot, owned):
         continue
-    host = ping(ip_addr, count=count, interval=interval, timeout=timeout)
+    host = ping(ip_addr, count=count, interval=interval, timeout=timeout, privileged=False)
     if host.is_alive:
         avg_ping = str(round(host.avg_rtt, 2)) + "ms"
         result_dict = {"hostname": hostname, "latency": round(host.avg_rtt, 2), "protocol": protocol, "stboot": stboot,
