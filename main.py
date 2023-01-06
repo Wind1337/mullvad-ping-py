@@ -16,7 +16,9 @@ parser.add_argument("--protocol", dest="use_protocol", default="all", choices=['
 parser.add_argument("--exclude-protocol", dest="exclude_protocol", default=None,
                     choices=['openvpn', 'wireguard', 'bridge'],
                     help="Exclude a VPN protocol - Default: none")
-parser.add_argument("--exclude-provider", dest="exclude_provider", default=None, help="Exclude a provider (M247)")
+parser.add_argument("--exclude-provider", dest="exclude_provider", default=None,
+                    help="Exclude a provider. Case-Sensitive. To exclude multiple providers, concatenate with '+' "
+                         "e.g. M247+xtom")
 parser.add_argument("--count", dest="count", default=5, help="Number of times to ping each host")
 parser.add_argument("--interval", dest="interval", default=200, help="Interval time between each ping (ms)")
 parser.add_argument("--timeout", dest="timeout", default=3, help="Time to wait before timeout (s)")
