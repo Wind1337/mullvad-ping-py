@@ -8,11 +8,11 @@ Python-based script to ping Mullvad relays
 2. PIP
 
 ### Steps
-1. Clone the repository
+1\. Clone the repository
 
 ```git clone https://github.com/Wind1337/mullvad-ping-py```
 
-2. Install requirements
+2\. Install requirements
 
 Windows
 
@@ -22,7 +22,7 @@ Mac/Linux
 
 ```pip3 install -r requirements.txt```
 
-3. Run the script (Arguments are optional)
+3\. Run the script (Arguments are optional)
 
 Windows
 
