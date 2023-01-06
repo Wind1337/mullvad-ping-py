@@ -37,7 +37,10 @@ server_type = args.server_type
 use_protocol = args.use_protocol
 
 # Exclude Providers
-exclude_provider = args.exclude_provider
+if args.exclude_provider:
+    exclude_provider = args.exclude_provider.split("+")
+else:
+    exclude_provider = None
 
 # Exclude Protocol
 exclude_protocol = args.exclude_protocol
@@ -48,6 +51,7 @@ timeout = int(args.timeout)
 
 results = []
 errors = []
+
 
 def handler(signum, frame):
     print_results()
@@ -70,6 +74,7 @@ def print_results():
                   .format(hostname=results[j]["hostname"], latency=str(results[j]["latency"])+"ms",
                           protocol=results[j]["protocol"], provider=results[j]["provider"]))
 
+
 def check_skip(country_code, provider, protocol, stboot, owned):
     if country:
         if country_code != country:
@@ -84,8 +89,9 @@ def check_skip(country_code, provider, protocol, stboot, owned):
         else:
             if server_type == "ram":
                 return True
-    if provider == exclude_provider:
-        return True
+    if exclude_provider:
+        if provider in exclude_provider:
+            return True
     if protocol == exclude_protocol:
         return True
     return False
