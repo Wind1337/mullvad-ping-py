@@ -8,7 +8,8 @@ parser = argparse.ArgumentParser(description="A Mullvad relay ping script")
 parser.add_argument("--owned", dest="owned", default=None, action='store_true',
                     help="Ping only servers owned by Mullvad")
 parser.add_argument("--country", dest="country", default=None,
-                    help="Ping servers from a certain country e.g.(us, uk, se)")
+                    help="Ping servers from a certain country e.g.(us, gb, se). "
+                         "To ping multiple countries, concatenate with '+' e.g. us+gb")
 parser.add_argument("--server-type", dest="server_type", default=None, choices=['ram', 'disk'],
                     help="Select a server type to ping e.g.(ram, disk)")
 parser.add_argument("--protocol", dest="use_protocol", default="all", choices=['openvpn', 'wireguard', 'bridge'],
@@ -29,7 +30,10 @@ args = parser.parse_args()
 owned_flag = args.owned
 
 # Ping country
-country = args.country
+if args.country:
+    country = args.country.split("+")
+else:
+    country = None
 
 # Server type
 server_type = args.server_type
@@ -79,7 +83,7 @@ def print_results():
 
 def check_skip(country_code, provider, protocol, stboot, owned):
     if country:
-        if country_code != country:
+        if country_code not in country:
             return True
     if owned_flag:
         if owned is False:
