@@ -29,9 +29,9 @@ jobs:
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
               mv dist/mullvad-ping-py dist/mullvad-ping-py-linux
-         elif [ "$RUNNER_OS" == "Windows" ]; then
+          elif [ "$RUNNER_OS" == "Windows" ]; then
               rename dist\mullvad-ping-py.exe mullvad-ping-py-windows.exe
-         elif [ "$RUNNER_OS" == "macOS" ]; then
+          elif [ "$RUNNER_OS" == "macOS" ]; then
               mv dist/mullvad-ping-py dist/mullvad-ping-py-macos
               exit 1
          fi
