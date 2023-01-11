@@ -39,9 +39,6 @@ jobs:
         id: short-sha
         with:
           length: 6
-      - run: echo $SHA
-        env: 
-          SHA: ${{ steps.short-sha.outputs.sha }}
       - uses: actions/upload-artifact@v3
         name: Upload Artifact
         with:
