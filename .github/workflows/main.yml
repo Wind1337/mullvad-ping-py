@@ -30,13 +30,16 @@ jobs:
           if [ "$RUNNER_OS" == "Linux" ]; then
               mv dist/mullvad-ping-py dist/mullvad-ping-py-linux
           elif [ "$RUNNER_OS" == "Windows" ]; then
-              rename dist\mullvad-ping-py.exe mullvad-ping-py-windows.exe
+              mv dist/mullvad-ping-py.exe dist/mullvad-ping-py-windows.exe
           elif [ "$RUNNER_OS" == "macOS" ]; then
               mv dist/mullvad-ping-py dist/mullvad-ping-py-macos
           fi
         shell: bash
+      - name: Add SHORT_SHA env property with commit short sha
+        run: |
+          echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v3
         name: Upload Artifact
         with:
-          name: mullvad-ping-py-${{ github.sha }}
+          name: mullvad-ping-py-${SHORT_SHA}
           path: dist/
