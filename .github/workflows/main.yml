@@ -33,7 +33,6 @@ jobs:
               rename dist\mullvad-ping-py.exe mullvad-ping-py-windows.exe
           elif [ "$RUNNER_OS" == "macOS" ]; then
               mv dist/mullvad-ping-py dist/mullvad-ping-py-macos
-              exit 1
           fi
       - uses: actions/upload-artifact@v3
         name: Upload Artifact
