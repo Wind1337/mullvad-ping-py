@@ -34,6 +34,7 @@ jobs:
           elif [ "$RUNNER_OS" == "macOS" ]; then
               mv dist/mullvad-ping-py dist/mullvad-ping-py-macos
           fi
+        shell: bash
       - uses: actions/upload-artifact@v3
         name: Upload Artifact
         with:
