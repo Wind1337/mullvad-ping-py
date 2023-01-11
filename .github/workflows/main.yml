@@ -26,3 +26,8 @@ jobs:
         run: |
           # stop the build if there are Python syntax errors or undefined names
           pyinstaller -F main.py -n mullvad-ping-py
+      - uses: actions/upload-artifact@v3
+        name: Upload Artifact
+        with:
+          name: mullvad-ping-py-dev
+          path: dist/
