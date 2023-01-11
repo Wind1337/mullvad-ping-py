@@ -35,11 +35,15 @@ jobs:
               mv dist/mullvad-ping-py dist/mullvad-ping-py-macos
           fi
         shell: bash
-      - name: Add SHORT_SHA env property with commit short sha
-        run: |
-          echo "SHORT_SHA=$("${{ github.sha }}".SubString(0, 8))" >> $env:GITHUB_ENV
+      - uses: benjlevesque/short-sha@v2.1
+        id: short-sha
+        with:
+          length: 6
+      - run: echo $SHA
+        env: 
+          SHA: ${{ steps.short-sha.outputs.sha }}
       - uses: actions/upload-artifact@v3
         name: Upload Artifact
         with:
-          name: mullvad-ping-py-${{ env.SHORT_SHA }}
+          name: mullvad-ping-py-${{ env.SHA }}
           path: dist/
