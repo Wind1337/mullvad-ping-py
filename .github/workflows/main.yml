@@ -13,6 +13,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - uses: benjlevesque/short-sha@v2.1
+        name: Get build commit short SHA
+        id: short-sha
+        with:
+          length: 7
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -28,17 +33,13 @@ jobs:
       - name: Rename Binaries
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
-              mv dist/mullvad-ping-py dist/mullvad-ping-py-linux
+              mv dist/mullvad-ping-py dist/mullvad-ping-py-linux-${{ env.SHA }}
           elif [ "$RUNNER_OS" == "Windows" ]; then
-              mv dist/mullvad-ping-py.exe dist/mullvad-ping-py-windows.exe
+              mv dist/mullvad-ping-py.exe dist/mullvad-ping-py-windows-${{ env.SHA }}.exe
           elif [ "$RUNNER_OS" == "macOS" ]; then
-              mv dist/mullvad-ping-py dist/mullvad-ping-py-macos
+              mv dist/mullvad-ping-py dist/mullvad-ping-py-macos-${{ env.SHA }}
           fi
         shell: bash
-      - uses: benjlevesque/short-sha@v2.1
-        id: short-sha
-        with:
-          length: 6
       - uses: actions/upload-artifact@v3
         name: Upload Artifact
         with:
