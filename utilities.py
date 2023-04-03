@@ -22,23 +22,12 @@ def print_results(results):
                           protocol=results[j]["protocol"], provider=results[j]["provider"]))
 
 
-def check_skip(country_code, provider, protocol, stboot, owned, country, owned_flag, server_type, exclude_provider, exclude_protocol):
-    if country:
-        if country_code not in country:
-            return True
-    if owned_flag:
-        if owned is False:
-            return True
-    if server_type:
-        if stboot:
-            if server_type == "disk":
-                return True
-        else:
-            if server_type == "ram":
-                return True
-    if exclude_provider:
-        if provider in exclude_provider:
-            return True
-    if protocol == exclude_protocol:
-        return True
-    return False
+def check_skip(country_code, provider, protocol, stboot, owned, country, owned_flag, server_type,
+               exclude_provider, exclude_protocol):
+    return (
+            (country and country_code not in country) or
+            (owned_flag and not owned) or
+            (server_type and ((stboot and server_type == "disk") or (not stboot and server_type == "ram"))) or
+            (exclude_provider and provider in exclude_provider) or
+            (protocol == exclude_protocol)
+    )
