@@ -1,8 +1,9 @@
-from icmplib import ping, SocketPermissionError
 import signal
 import sys
 import requests
 import argparse
+from icmplib import ping, SocketPermissionError
+from utilities import handler, print_results, check_skip
 
 parser = argparse.ArgumentParser(description="A Mullvad relay ping script")
 parser.add_argument("--owned", dest="owned", default=None, action='store_true',
@@ -58,52 +59,7 @@ timeout = int(args.timeout)
 results = []
 errors = []
 
-
-def handler(signum, frame):
-    print_results()
-    sys.exit(0)
-
-
-def print_results():
-    global results
-    results = sorted(results, key=lambda d: d['latency'])
-    print("\nRESULTS\n")
-    print("Servers with the lowest latency")
-    if len(results) < 5:
-        for j in range(len(results)):
-            print("Hostname: {hostname:15s}| latency: {latency:10s} protocol: {protocol:10s} provider: {provider:10s}"
-                  .format(hostname=results[j]["hostname"], latency=str(results[j]["latency"])+"ms",
-                          protocol=results[j]["protocol"], provider=results[j]["provider"]))
-    else:
-        for j in range(5):
-            print("Hostname: {hostname:15s}| latency: {latency:10s} protocol: {protocol:10s} provider: {provider:10s}"
-                  .format(hostname=results[j]["hostname"], latency=str(results[j]["latency"])+"ms",
-                          protocol=results[j]["protocol"], provider=results[j]["provider"]))
-
-
-def check_skip(country_code, provider, protocol, stboot, owned):
-    if country:
-        if country_code not in country:
-            return True
-    if owned_flag:
-        if owned is False:
-            return True
-    if server_type:
-        if stboot:
-            if server_type == "disk":
-                return True
-        else:
-            if server_type == "ram":
-                return True
-    if exclude_provider:
-        if provider in exclude_provider:
-            return True
-    if protocol == exclude_protocol:
-        return True
-    return False
-
-
-signal.signal(signal.SIGINT, handler)
+signal.signal(signal.SIGINT, lambda signum, frame: handler(signum, frame, lambda: print_results(results)))
 
 api_url = "https://api.mullvad.net/www/relays/"
 api_url += use_protocol
@@ -143,7 +99,8 @@ for i in range(len(response_json)):
     else:
         protocol = use_protocol
     provider = response_json[i]["provider"]
-    if check_skip(country_code, provider, protocol, stboot, owned):
+    if check_skip(country_code, provider, protocol, stboot, owned, country, owned_flag, server_type,
+                  exclude_provider, exclude_protocol):
         continue
     host = ping(ip_addr, count=count, interval=interval, timeout=timeout, privileged=False)
     if host.is_alive:
@@ -158,4 +115,4 @@ for i in range(len(response_json)):
         errors.append(result_dict)
         print("Failed to ping {hostname} ({ip_addr})".format(hostname=hostname, ip_addr=ip_addr))
 
-print_results()
+print_results(results)
