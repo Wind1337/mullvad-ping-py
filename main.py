@@ -2,7 +2,7 @@ import signal
 import sys
 import requests
 import argparse
-from icmplib import ping, SocketPermissionError
+from icmplib import ping, multiping, SocketPermissionError
 from utilities import handler, print_results, check_skip
 
 parser = argparse.ArgumentParser(description="A Mullvad relay ping script")
@@ -86,8 +86,12 @@ except SocketPermissionError:
     print("Rerun with sudo or as administrator")
     sys.exit(1)
 
-print("Initiating ping operation with parameters: count={count}, interval={interval:.0f}ms, timeout={timeout}s \n"
+print("Initiating multiping operation with parameters: count={count}, interval={interval:.0f}ms, timeout={timeout}s, "
+      "concurrent_tasks=50 \n"
       .format(count=count, interval=interval * 1000, timeout=timeout))
+ip_list = []
+host_data = []
+
 for i in range(len(response_json)):
     country_code = response_json[i]["country_code"]
     ip_addr = response_json[i]["ipv4_addr_in"]
@@ -99,20 +103,42 @@ for i in range(len(response_json)):
     else:
         protocol = use_protocol
     provider = response_json[i]["provider"]
-    if check_skip(country_code, provider, protocol, stboot, owned, country, owned_flag, server_type,
-                  exclude_provider, exclude_protocol):
-        continue
-    host = ping(ip_addr, count=count, interval=interval, timeout=timeout, privileged=False)
-    if host.is_alive:
-        avg_ping = str(round(host.avg_rtt, 2)) + "ms"
-        result_dict = {"hostname": hostname, "latency": round(host.avg_rtt, 2), "protocol": protocol, "stboot": stboot,
-                       "provider": provider, "owned": owned}
-        results.append(result_dict)
-        print("Pinged {hostname:15s}| latency={avg_ping:10s} protocol={protocol:10s} provider={provider:10s}"
-              .format(hostname=hostname, avg_ping=avg_ping, protocol=protocol, provider=provider))
-    else:
-        result_dict = {"hostname": hostname, "latency": "timeout"}
-        errors.append(result_dict)
-        print("Failed to ping {hostname} ({ip_addr})".format(hostname=hostname, ip_addr=ip_addr))
+
+    if not check_skip(country_code, provider, protocol, stboot, owned, country, owned_flag, server_type, exclude_provider, exclude_protocol):
+        ip_list.append(ip_addr)
+        host_data.append({
+            "country_code": country_code,
+            "ip_addr": ip_addr,
+            "hostname": hostname,
+            "stboot": stboot,
+            "owned": owned,
+            "protocol": protocol,
+            "provider": provider
+        })
+
+
+hosts = multiping(ip_list, count=count, interval=interval, concurrent_tasks=50, timeout=timeout, privileged=False)
+
+for host in hosts:
+    ip_addr = host.address
+    matching_host_data = next(filter(lambda h: h["ip_addr"] == ip_addr, host_data), None)
+
+    if matching_host_data:
+        hostname = matching_host_data["hostname"]
+        protocol = matching_host_data["protocol"]
+        provider = matching_host_data["provider"]
+        stboot = matching_host_data["stboot"]
+        owned = matching_host_data["owned"]
+        if host.is_alive:
+            avg_ping = str(round(host.avg_rtt, 2)) + "ms"
+            result_dict = {"hostname": hostname, "latency": round(host.avg_rtt, 2), "protocol": protocol,
+                           "stboot": stboot, "provider": provider, "owned": owned}
+            results.append(result_dict)
+            print("Pinged {hostname:15s}| latency={avg_ping:10s} protocol={protocol:10s} provider={provider:10s}"
+                  .format(hostname=hostname, avg_ping=avg_ping, protocol=protocol, provider=provider))
+        else:
+            result_dict = {"hostname": hostname, "latency": "timeout"}
+            errors.append(result_dict)
+            print("Failed to ping {hostname} ({ip_addr})".format(hostname=hostname, ip_addr=ip_addr))
 
 print_results(results)
