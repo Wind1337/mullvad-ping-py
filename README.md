@@ -78,6 +78,8 @@ options:
   --count COUNT         Number of times to ping each host
   --interval INTERVAL   Interval time between each ping (ms)
   --timeout TIMEOUT     Time to wait before timeout (s)
+  --concurrent CONCURRENT
+                        Concurrent multiping tasks
 ```
 
 ## Argument examples
@@ -129,6 +131,7 @@ mullvad-ping-py --count 3
 ```
 
 ### Wait 100ms between each ping
+⚠ Not recommended to set this value to 50 or lower
 ```
 mullvad-ping-py --interval 100
 ```
@@ -136,6 +139,12 @@ mullvad-ping-py --interval 100
 ### Wait 1 second before timing out the ping request
 ```
 mullvad-ping-py --timeout 1
+```
+
+### Ping 100 servers concurrently
+⚠ You may experience system-wide instability with a value higher than 1000
+```
+mullvad-ping-py --concurrent 100
 ```
 
 ## To-do:
