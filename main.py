@@ -3,7 +3,8 @@ import sys
 import requests
 import argparse
 from icmplib import ping, multiping, SocketPermissionError
-from utilities import handler, print_results, check_skip
+from utilities import handler, split_into_parts, print_results, check_skip
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser(description="A Mullvad relay ping script")
 parser.add_argument("--owned", dest="owned", default=None, action='store_true',
@@ -104,7 +105,8 @@ for i in range(len(response_json)):
         protocol = use_protocol
     provider = response_json[i]["provider"]
 
-    if not check_skip(country_code, provider, protocol, stboot, owned, country, owned_flag, server_type, exclude_provider, exclude_protocol):
+    if not check_skip(country_code, provider, protocol, stboot, owned, country, owned_flag, server_type,
+                      exclude_provider, exclude_protocol):
         ip_list.append(ip_addr)
         host_data.append({
             "country_code": country_code,
@@ -116,29 +118,42 @@ for i in range(len(response_json)):
             "provider": provider
         })
 
+batch_size = 1
+# TODO: "50" should match the concurrent_task arg when it is implemented
+if len(ip_list) > 50:
+    # TODO: Batch size configurable by arg
+    ip_list_batches = list(split_into_parts(ip_list, 4))
+    host_data_batches = list(split_into_parts(host_data, 4))
+    batch_size = len(ip_list_batches)
+else:
+    ip_list_batches = [ip_list]
+    host_data_batches = [host_data]
 
-hosts = multiping(ip_list, count=count, interval=interval, concurrent_tasks=50, timeout=timeout, privileged=False)
+# Use ip_list_batches and host_data_batches in the for loop
+for ip_batch, host_batch in tqdm(zip(ip_list_batches, host_data_batches), total=batch_size, desc="Pinging"):
+    hosts = multiping(ip_batch, count=count, interval=interval, timeout=timeout, concurrent_tasks=50, privileged=False)
+    for host in hosts:
+        ip_addr = host.address
+        matching_host_data = next(filter(lambda h: h["ip_addr"] == ip_addr, host_batch), None)
 
-for host in hosts:
-    ip_addr = host.address
-    matching_host_data = next(filter(lambda h: h["ip_addr"] == ip_addr, host_data), None)
-
-    if matching_host_data:
-        hostname = matching_host_data["hostname"]
-        protocol = matching_host_data["protocol"]
-        provider = matching_host_data["provider"]
-        stboot = matching_host_data["stboot"]
-        owned = matching_host_data["owned"]
-        if host.is_alive:
-            avg_ping = str(round(host.avg_rtt, 2)) + "ms"
-            result_dict = {"hostname": hostname, "latency": round(host.avg_rtt, 2), "protocol": protocol,
-                           "stboot": stboot, "provider": provider, "owned": owned}
-            results.append(result_dict)
-            print("Pinged {hostname:15s}| latency={avg_ping:10s} protocol={protocol:10s} provider={provider:10s}"
-                  .format(hostname=hostname, avg_ping=avg_ping, protocol=protocol, provider=provider))
-        else:
-            result_dict = {"hostname": hostname, "latency": "timeout"}
-            errors.append(result_dict)
-            print("Failed to ping {hostname} ({ip_addr})".format(hostname=hostname, ip_addr=ip_addr))
+        if matching_host_data:
+            hostname = matching_host_data["hostname"]
+            protocol = matching_host_data["protocol"]
+            provider = matching_host_data["provider"]
+            stboot = matching_host_data["stboot"]
+            owned = matching_host_data["owned"]
+            if host.is_alive:
+                avg_ping = str(round(host.avg_rtt, 2)) + "ms"
+                result_dict = {"hostname": hostname, "latency": round(host.avg_rtt, 2), "protocol": protocol,
+                               "stboot": stboot,
+                               "provider": provider, "owned": owned}
+                results.append(result_dict)
+                tqdm.write(
+                    "Pinged {hostname:15s}| latency={avg_ping:10s} protocol={protocol:10s} provider={provider:10s}"
+                    .format(hostname=hostname, avg_ping=avg_ping, protocol=protocol, provider=provider))
+            else:
+                result_dict = {"hostname": hostname, "latency": "timeout"}
+                errors.append(result_dict)
+                tqdm.write("Failed to ping {hostname} ({ip_addr})".format(hostname=hostname, ip_addr=ip_addr))
 
 print_results(results)

@@ -6,6 +6,18 @@ def handler(signum, frame, print_func):
     sys.exit(0)
 
 
+def split_into_parts(lst, parts):
+    length = len(lst)
+    div_size = length // parts
+    remainder = length % parts
+    start = 0
+    for _ in range(parts):
+        end = start + div_size + (1 if remainder > 0 else 0)
+        yield lst[start:end]
+        start = end
+        remainder -= 1
+
+
 def print_results(results):
     results = sorted(results, key=lambda d: d['latency'])
     print("\nRESULTS\n")
