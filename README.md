@@ -1,6 +1,8 @@
 # mullvad-ping-py
 Python-based script to ping Mullvad relays
 
+Built upon [icmplib](https://github.com/ValentinBELYN/icmplib) multiping function - allowing concurrent pings
+
 ## Running from source
 
 ### Prerequisites
@@ -59,7 +61,7 @@ sudo ./mullvad-ping-py <args>
 ## Arguments
 ```
 usage: mullvad-ping-py.exe [-h] [--owned] [--country COUNTRY] [--server-type {ram,disk}] [--protocol {openvpn,wireguard,bridge}] [--exclude-protocol {openvpn,wireguard,bridge}] [--exclude-provider EXCLUDE_PROVIDER] [--count COUNT]
-                           [--interval INTERVAL] [--timeout TIMEOUT]
+                           [--interval INTERVAL] [--timeout TIMEOUT] [--concurrent CONCURRENT]
 
 A Mullvad relay ping script
 
