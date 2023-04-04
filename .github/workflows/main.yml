@@ -1,6 +1,6 @@
 name: PyInstaller Build
 
-on: [push]
+on: [ push ]
 
 jobs:
   build:
@@ -8,8 +8,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, macos-11, windows-2022]
-        python-version: ["3.7"]
+        os: [ ubuntu-20.04, macos-11, windows-2022 ]
+        python-version: [ "3.7" ]
 
     steps:
       - uses: actions/checkout@v3
@@ -29,7 +29,7 @@ jobs:
           pip install -r requirements.txt
       - name: PyInstaller Build
         run: |
-          pyinstaller -F main.py -n mullvad-ping-py
+          pyinstaller -F main.py -n mullvad-ping-py -i assets/favicon.ico
       - name: Rename Binaries
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
