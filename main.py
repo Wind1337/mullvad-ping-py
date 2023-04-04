@@ -87,9 +87,9 @@ except SocketPermissionError:
     print("Rerun with sudo or as administrator")
     sys.exit(1)
 
-print("Initiating multiping operation with parameters: count={count}, interval={interval:.0f}ms, timeout={timeout}s, "
-      "concurrent_tasks=50 \n"
-      .format(count=count, interval=interval * 1000, timeout=timeout))
+print(
+    f"Initiating multiping operation with parameters: count={count}, interval={interval * 1000:.0f}ms, "
+    f"timeout={timeout}s, concurrent_tasks=50")
 ip_list = []
 host_data = []
 
@@ -121,15 +121,16 @@ for i in range(len(response_json)):
 batch_size = 1
 # TODO: "50" should match the concurrent_task arg when it is implemented
 if len(ip_list) > 50:
-    # TODO: Batch size configurable by arg
-    ip_list_batches = list(split_into_parts(ip_list, 4))
-    host_data_batches = list(split_into_parts(host_data, 4))
+    parts = -(len(ip_list) // -50)
+    ip_list_batches = list(split_into_parts(ip_list, parts))
+    host_data_batches = list(split_into_parts(host_data, parts))
     batch_size = len(ip_list_batches)
 else:
     ip_list_batches = [ip_list]
     host_data_batches = [host_data]
 
-# Use ip_list_batches and host_data_batches in the for loop
+print(f"Split target list into {batch_size} batches \n")
+
 for ip_batch, host_batch in tqdm(zip(ip_list_batches, host_data_batches), total=batch_size, desc="Pinging"):
     hosts = multiping(ip_batch, count=count, interval=interval, timeout=timeout, concurrent_tasks=50, privileged=False)
     for host in hosts:
@@ -149,11 +150,10 @@ for ip_batch, host_batch in tqdm(zip(ip_list_batches, host_data_batches), total=
                                "provider": provider, "owned": owned}
                 results.append(result_dict)
                 tqdm.write(
-                    "Pinged {hostname:15s}| latency={avg_ping:10s} protocol={protocol:10s} provider={provider:10s}"
-                    .format(hostname=hostname, avg_ping=avg_ping, protocol=protocol, provider=provider))
+                    f"Pinged {hostname:15s}| latency={avg_ping:10s} protocol={protocol:10s} provider={provider:10s}")
             else:
                 result_dict = {"hostname": hostname, "latency": "timeout"}
                 errors.append(result_dict)
-                tqdm.write("Failed to ping {hostname} ({ip_addr})".format(hostname=hostname, ip_addr=ip_addr))
+                tqdm.write(f"Failed to ping {hostname} ({ip_addr})")
 
 print_results(results)
