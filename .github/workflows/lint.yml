@@ -25,4 +25,5 @@ jobs:
       - name: Run linters
         uses: wearerequired/lint-action@v2
         with:
+          black: true
           flake8: true
