@@ -25,6 +25,7 @@ parser.add_argument("--exclude-provider", dest="exclude_provider", default=None,
 parser.add_argument("--count", dest="count", default=5, help="Number of times to ping each host")
 parser.add_argument("--interval", dest="interval", default=200, help="Interval time between each ping (ms)")
 parser.add_argument("--timeout", dest="timeout", default=3, help="Time to wait before timeout (s)")
+parser.add_argument("--concurrent", dest="concurrent", default=50, help="Concurrent multiping tasks")
 
 args = parser.parse_args()
 
@@ -56,6 +57,7 @@ exclude_protocol = args.exclude_protocol
 count = int(args.count)
 interval = float(args.interval) / 1000
 timeout = int(args.timeout)
+concurrent = int(args.concurrent)
 
 results = []
 errors = []
@@ -89,7 +91,7 @@ except SocketPermissionError:
 
 print(
     f"Initiating multiping operation with parameters: count={count}, interval={interval * 1000:.0f}ms, "
-    f"timeout={timeout}s, concurrent_tasks=50")
+    f"timeout={timeout}s, concurrent_tasks={concurrent}")
 ip_list = []
 host_data = []
 
@@ -119,9 +121,8 @@ for i in range(len(response_json)):
         })
 
 batch_size = 1
-# TODO: "50" should match the concurrent_task arg when it is implemented
-if len(ip_list) > 50:
-    parts = -(len(ip_list) // -50)
+if len(ip_list) > concurrent:
+    parts = -(len(ip_list) // -concurrent)
     ip_list_batches = list(split_into_parts(ip_list, parts))
     host_data_batches = list(split_into_parts(host_data, parts))
     batch_size = len(ip_list_batches)
@@ -132,7 +133,7 @@ else:
 print(f"Split target list into {batch_size} batches \n")
 
 for ip_batch, host_batch in tqdm(zip(ip_list_batches, host_data_batches), total=batch_size, desc="Pinging"):
-    hosts = multiping(ip_batch, count=count, interval=interval, timeout=timeout, concurrent_tasks=50, privileged=False)
+    hosts = multiping(ip_batch, count=count, interval=interval, timeout=timeout, concurrent_tasks=concurrent, privileged=False)
     for host in hosts:
         ip_addr = host.address
         matching_host_data = next(filter(lambda h: h["ip_addr"] == ip_addr, host_batch), None)
