@@ -18,6 +18,16 @@ jobs:
         id: short-sha
         with:
           length: 7
+      - name: Set OS short name and file extension
+        run: |
+          OS_NAME=$(echo "${{ matrix.os }}" | sed -E 's/-.*//' | tr -d '\r\n')
+          EXT=""
+          if [ "$OS_NAME" = "windows" ]; then
+            EXT=".exe"
+          fi
+          echo "OS_SHORT_NAME=$OS_NAME" >> $GITHUB_ENV
+          echo "EXTENSION=$EXT" >> $GITHUB_ENV
+        shell: bash
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -30,18 +40,18 @@ jobs:
       - name: PyInstaller Build
         run: |
           pyinstaller --onefile -F main.py -n mullvad-ping-py -i assets/favicon.ico
-      - name: Rename Binaries
+      - name: Rename Binary
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
-              mv dist/mullvad-ping-py dist/mullvad-ping-py-linux-${{ env.SHA }}
+              mv dist/mullvad-ping-py dist/mullvad-ping-py-${{ env.OS_SHORT_NAME }}-${{ env.SHA }}
           elif [ "$RUNNER_OS" == "Windows" ]; then
-              mv dist/mullvad-ping-py.exe dist/mullvad-ping-py-windows-${{ env.SHA }}.exe
+              mv dist/mullvad-ping-py.exe dist/mullvad-ping-py-${{ env.OS_SHORT_NAME }}-${{ env.SHA }}.exe
           elif [ "$RUNNER_OS" == "macOS" ]; then
-              mv dist/mullvad-ping-py dist/mullvad-ping-py-macos-${{ env.SHA }}
+              mv dist/mullvad-ping-py dist/mullvad-ping-py-${{ env.OS_SHORT_NAME }}-${{ env.SHA }}
           fi
         shell: bash
       - uses: actions/upload-artifact@v4
         name: Upload Artifact
         with:
-          name: mullvad-ping-py-${{ env.SHA }}
-          path: dist/
+          name: mullvad-ping-py-${{ env.OS_SHORT_NAME }}-${{ env.SHA }}${{ env.EXTENSION }}
+          path: dist/mullvad-ping-py-${{ env.OS_SHORT_NAME }}-${{ env.SHA }}${{ env.EXTENSION }}
