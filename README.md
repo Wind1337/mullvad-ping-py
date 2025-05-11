@@ -6,7 +6,7 @@ Built upon [icmplib](https://github.com/ValentinBELYN/icmplib) multiping functio
 ## Running from source
 
 ### Prerequisites
-1. Python 3 (3.7+ recommended, tested with 3.8 - 3.11)
+1. Python 3 (Tested with 3.11)
 2. PIP
 
 ### Steps
