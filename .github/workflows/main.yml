@@ -8,18 +8,18 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-20.04, macos-11, windows-2022 ]
-        python-version: [ "3.7" ]
+        os: [ ubuntu-24.04, macos-13, windows-2025 ]
+        python-version: [ "3.11" ]
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: benjlevesque/short-sha@v2.1
+      - uses: actions/checkout@v4
+      - uses: benjlevesque/short-sha@v3.0
         name: Get build commit short SHA
         id: short-sha
         with:
           length: 7
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -29,7 +29,7 @@ jobs:
           pip install -r requirements.txt
       - name: PyInstaller Build
         run: |
-          pyinstaller -F main.py -n mullvad-ping-py -i assets/favicon.ico
+          pyinstaller --onefile -F main.py -n mullvad-ping-py -i assets/favicon.ico
       - name: Rename Binaries
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
@@ -40,7 +40,7 @@ jobs:
               mv dist/mullvad-ping-py dist/mullvad-ping-py-macos-${{ env.SHA }}
           fi
         shell: bash
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         name: Upload Artifact
         with:
           name: mullvad-ping-py-${{ env.SHA }}
